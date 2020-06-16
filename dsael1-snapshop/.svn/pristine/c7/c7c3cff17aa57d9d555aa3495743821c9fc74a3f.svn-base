@@ -1,0 +1,324 @@
+/*
+ * TCSS 305 – Autumn 2018
+ */
+
+package gui;
+
+import filters.EdgeDetectFilter;
+import filters.EdgeHighlightFilter;
+import filters.Filter;
+import filters.FlipHorizontalFilter;
+import filters.FlipVerticalFilter;
+import filters.GrayscaleFilter;
+import filters.SharpenFilter;
+import filters.SoftenFilter;
+import image.PixelImage;
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+/**
+ * {@code} Creates GUI used to manipulate images.
+ * 
+ * @author David Saelee
+ * @version 11/2/18
+ */
+public class SnapShopGUI extends JFrame {
+    /**
+     * Serial version ID used during deserialization to verify serialized
+     * objects have loaded classes.
+     */
+    private static final long serialVersionUID = -2144739668936849562L;
+    /**
+     * Stores image value.
+     */
+    private PixelImage myImage;
+    /**
+     * Stores JButton array values.
+     */
+    private ArrayList<JButton> myDisable;
+
+    /**
+     * Calls the SnapShopGUI constructor with arguments.
+     */
+    public SnapShopGUI() {
+        super("TCSS 305 – Assignment 4");
+        myDisable = new ArrayList<JButton>();
+    }
+
+    /**
+     * Displays GUI with seven disabled filter buttons, two disabled menu buttons and
+     * an one enabled menu button.
+     */
+    public void start() {
+        setLayout(new BorderLayout());
+
+        // ALL TOP BUTTONS
+        final JPanel topPanel = new JPanel();
+        add(topPanel, BorderLayout.NORTH);
+
+        addFilter(new EdgeDetectFilter(), topPanel);
+        addFilter(new EdgeHighlightFilter(), topPanel);
+        addFilter(new FlipHorizontalFilter(), topPanel);
+        addFilter(new FlipVerticalFilter(), topPanel);
+        addFilter(new GrayscaleFilter(), topPanel);
+        addFilter(new SharpenFilter(), topPanel);
+        addFilter(new SoftenFilter(), topPanel);
+
+        // MID IMAGES
+        final JPanel labelPanel = new JPanel();
+        add(labelPanel, BorderLayout.CENTER);
+        final JLabel label = new JLabel();
+        labelPanel.add(label);
+
+        // ALL BOTTOM BUTTONS
+        final JPanel bottomPanel = new JPanel();
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        final JButton open = new JButton("Open...");
+        bottomPanel.add(open);
+
+        final JFileChooser chooser = new JFileChooser("sample_images");
+
+        open.addActionListener(new ActionListener() {
+            /**
+             * The scope of this inner method is restricted to the open button.
+             * Loads selected image and enables all buttons.
+             * 
+             * @param arg0 no argument passed into method.
+             */
+            @Override
+            public void actionPerformed(final ActionEvent arg0) {
+                openFile(chooser, label);
+
+            }
+        });
+
+        final JButton saveAs = new JButton("Save As...");
+        bottomPanel.add(saveAs);
+        myDisable.add(saveAs);
+        saveAs.addActionListener(new ActionListener() {
+
+            /**
+             * The scope of this inner method is restricted to the 'save as'
+             * button. Uses pixel image method save() to save image after
+             * manipulation.
+             * 
+             * @param arg0 no argument passed into method.
+             */
+            @Override
+            public void actionPerformed(final ActionEvent arg0) {
+                saveFile(chooser, label);
+            }
+
+        });
+
+        final JButton closeButton = new JButton("Close Image");
+        bottomPanel.add(closeButton);
+        myDisable.add(closeButton);
+        closeButton.addActionListener(new ActionListener() {
+            /**
+             * The scope of this inner method is restricted to the 'close image'
+             * button. Disables all buttons, clears image from container,
+             * removes size modifications and sets window back to default.
+             * 
+             * @param arg0 no argument passed into method.
+             */
+            @Override
+            public void actionPerformed(final ActionEvent arg0) {
+                closeFile(chooser, label);
+            }
+        });
+
+        disableButton();
+        pack();
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    }
+
+    /**
+     * Disables all buttons.
+     */
+    private void disableButton() {
+
+        for (JButton b : myDisable) {
+            b.setEnabled(false);
+        }
+    }
+
+    /**
+     * Enables all buttons.
+     */
+    private void enableButton() {
+
+        for (JButton b : myDisable) {
+            b.setEnabled(true);
+        }
+    }
+
+    /**
+     * {@code} Creates disabled filter button with given name. Add
+     * actionListener to button, creates inner method to perform filter action
+     * on image.
+     * 
+     * @param theFilter passes filter as argument.
+     * @param thePanel passes panel as argument.
+     */
+    public void addFilter(final Filter theFilter, final JPanel thePanel) {
+
+        final JPanel panel = thePanel;
+
+        final JButton button = new JButton(theFilter.getDescription());
+        myDisable.add(button);
+        panel.add(button);
+        button.addActionListener(new ActionListener() {
+
+            /**
+             * The scope of this inner method is restricted to the addFilter
+             * method. Applies filter behavior to the selected image.
+             * 
+             * @param arg0 no argument passed into method.
+             */
+            @Override
+            public void actionPerformed(final ActionEvent arg0) {
+                theFilter.filter(myImage);
+                repaint();
+            }
+        });
+
+    }
+
+    /**
+     * Helper method to disables all buttons, clears image from container,
+     * removes size modifications and sets window back to default.
+     * 
+     * @param theLabel value passed as argument.
+     */
+    public void closeBox(final JLabel theLabel) {
+
+        final JLabel label = theLabel;
+        disableButton();
+        label.setIcon(null);
+        setMinimumSize(null);
+        pack();
+    }
+    /**
+     * Helper method to display JOptionPane message when
+     * IOException error is thrown.
+     * 
+     * @param theE throws IOException error message.
+     */
+    public void invalidEntry(final IOException theE) {
+
+        JOptionPane.showMessageDialog(null, theE, "Invalid Entry", JOptionPane.ERROR_MESSAGE);
+    }
+    /**
+     * Helper method used to save image after manipulation.  Displays
+     * message if invalid entries are inputed.  Loops through
+     * code until valid entry is chosen. 
+     * 
+     * @param theChooser value passed in as argument.
+     * @param theLabel value passed in as argument.
+     */
+    public void saveFile(final JFileChooser theChooser, final JLabel theLabel) {
+
+        final int result = theChooser.showSaveDialog(null);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            final File f = theChooser.getSelectedFile();
+            try {
+                myImage.save(f);
+                JOptionPane.showMessageDialog(null, "Image has been saved!");
+                final int response = JOptionPane.showConfirmDialog
+                                (null, "Would you like to try work on another file?");
+                if (response == JOptionPane.YES_OPTION) {
+                    openFile(theChooser, theLabel);
+                }
+                if (response == JOptionPane.NO_OPTION) {
+                    closeBox(theLabel);
+                }
+                
+            } catch (final IOException e) {
+                invalidEntry(e);
+                final int response = JOptionPane.showConfirmDialog
+                                (null, "Would you like try again?");
+                if (response == JOptionPane.YES_OPTION) {
+                    saveFile(theChooser, theLabel);
+                }
+                if (response == JOptionPane.NO_OPTION) {
+                    closeBox(theLabel);
+                }
+            }
+        }
+        if (result == JFileChooser.CANCEL_OPTION) {
+            JOptionPane.showMessageDialog(null, "Image was not saved.");     
+        }
+    }
+    /**
+     * Helper method used to open image.  Displays
+     * message if invalid entries are inputed.  Loops through
+     * code until valid entry is chosen. 
+     * 
+     * @param theChooser value passed in as argument.
+     * @param theLabel value passed in as argument.
+     */
+    public void openFile(final JFileChooser theChooser, final JLabel theLabel) {
+        final int result = theChooser.showOpenDialog(null);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            final File f = theChooser.getSelectedFile();
+
+            try {
+                myImage = PixelImage.load(f);
+                theLabel.setIcon(new ImageIcon(myImage));
+                pack();
+                setMinimumSize(getSize());
+                enableButton();
+            } catch (final IOException e) {
+                invalidEntry(e);
+                final int response = JOptionPane.showConfirmDialog
+                                (null, "Would you like to try another file?");
+                if (response == JOptionPane.YES_OPTION) {
+                    openFile(theChooser, theLabel);
+                }
+                if (response == JOptionPane.NO_OPTION) {
+                    closeBox(theLabel);
+                }
+            }
+        }
+    }
+    /**
+     * Helper method used to close image.  Will
+     * prompt user to save.  Displays message if invalid 
+     * entries are inputed.  Loops through
+     * code until valid entry is chosen. 
+     * 
+     * @param theChooser value passed in as argument.
+     * @param theLabel value passed in as argument.
+     */
+    public void closeFile(final JFileChooser theChooser, final JLabel theLabel) {
+        final int response = JOptionPane.showConfirmDialog
+                        (null, "Would you like to save your work?");
+        if (response == JOptionPane.YES_OPTION) {
+            saveFile(theChooser, theLabel);
+            closeBox(theLabel);
+        }
+        if (response == JOptionPane.NO_OPTION) {
+            closeBox(theLabel);
+        }
+        if (response == JOptionPane.CANCEL_OPTION) {
+            JOptionPane.showMessageDialog(null, "File was not saved");
+        }
+    }
+        
+}
