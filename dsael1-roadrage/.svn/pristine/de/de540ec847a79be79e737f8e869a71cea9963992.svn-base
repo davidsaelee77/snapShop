@@ -1,0 +1,50 @@
+package model;
+
+import java.util.Map;
+
+public class Taxi extends AbstractVehicle implements Vehicle {
+    
+    private static final int DEATH_TIME = 15;
+
+    private Taxi(final int theX, final int theY, final Direction theDir, final int theDeathTime) {
+        super(theX, theY, theDir, DEATH_TIME);
+       
+    }
+    /*Taxis can only travel on streets and through lights and crosswalks.
+    • A taxi prefers to drive straight ahead if it can. If it cannot move straight ahead, it 
+    turns left if possible; if it cannot turn left, it turns right if possible; as a last resort, 
+    it turns around.
+    • Taxis stop for red lights; if a traffic light is immediately ahead of the taxi and the light 
+                    is red, the Taxi stays still and does not move until the light turns green. It 
+                    does not turn to avoid the light. When the light turns green the taxi resumes its 
+                    original direction. Taxis ignore yellow and green lights.
+    • Taxis stop for (temporarily) red crosswalk lights. If a crosswalk light is immediately ahead of 
+    the taxi and the crosswalk light is red, the Taxi stays still and does not move for 3 clock cycles 
+    or until the crosswalk light turns green, whichever occurs first. It does not turn to avoid the 
+    crosswalk light. When the crosswalk light turns green, or after 3 clock cycles, whichever happens
+    first, the taxi resumes its original direction. A Taxi will drive through yellow or green crosswalk 
+    lights without stopping*/
+    
+    //Streets and crosswalks
+    //straight, left, right, reverses
+    //stops for red lights
+    //ignores yellow and green lights
+    //stops for red light crosswalks (temp), 
+    //drives through green and yellow crosswalk lights
+    
+    @Override
+    public boolean canPass(Terrain theTerrain, Light theLight) {
+        
+        
+        
+        
+        return false;
+    }
+
+    @Override
+    public Direction chooseDirection(Map<Direction, Terrain> theNeighbors) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+}
